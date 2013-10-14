@@ -1,26 +1,12 @@
-#!/home/sun/.rvm/rubies/ruby-1.9.3-p448/bin/ruby
-
 $:.unshift File.dirname(__FILE__)
 require 'rubygems'
 require 'net/ssh'
 require 'net/scp'
 require 'socket'
-require 'netsshex.rb'
 require 'yaml'
 require 'eventmachine'
 
-#run mutithread system dump
-
-ConfigureList = Struct.new(:ip,:timesec)
-list = []
-
-yml = YAML::load_file('config.yml')
-
-yml["ip"].each do |ip|
-  list << ip
-end
-
-def thread_process(host)
+def vm_dump_thread(host)
   begin
     Net::SSH.start(host,'root',:password=>"password",:timeout=>5) do |ssh|
       puts "success to setup. #{host}"
@@ -49,17 +35,13 @@ def heartbeat_test(host)
   return num
 end
 
-
-$flag = 1;
-
-loop do
-
+def dumpVM(list)
   EM.run do
     EM.defer do
       thread = []
       puts list.size()
       list.each do |host|
-        thread << Thread.new{ thread_process(host) }
+        thread << Thread.new{ vm_dump_thread(host) }
       end
       thread.each do |s|
         s.join
@@ -77,9 +59,6 @@ loop do
       end
     end
   end
-
-  sleep(yml['time'].to_i)
-
 end
 
 

@@ -9,7 +9,7 @@ require 'yaml'
 require 'eventmachine'
 require 'sysdump'
 
-def process_dump_thread(host)
+def process_dump_thread(host,tp)
   begin
     Net::SSH.start(host,'root',:password=>"password",:timeout=>5) do |ssh|
       puts "success to connect. #{host}"
@@ -27,7 +27,7 @@ def process_dump_thread(host)
         end
       end
       if pid.size > 0
-        i = rand(pid.size)
+        i = tp % pid.size
         if pid[i] != '-1'
           ssh.exec!("kill -9 #{pid[i]}")
         else
@@ -37,6 +37,8 @@ def process_dump_thread(host)
           end
         end
         puts "host "+host+" : "+jobs[i]+" killed"
+      else
+        puts "No process in this vm."
       end
     end
   rescue Timeout::Error
@@ -47,9 +49,9 @@ def process_dump_thread(host)
 end
 
 
-def process_dump(list)
+def process_dump(list,num)
   list.each do |host|
-    process_dump_thread(host)
+    process_dump_thread(host,num)
   end
 end
 

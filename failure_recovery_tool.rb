@@ -13,6 +13,7 @@ require 'processdump'
 #run mutithread system dump
 
 $list = []
+$num = 0
 $yml = nil
 
 def init()
@@ -23,13 +24,15 @@ def init()
 end
 
 
+
 loop do
   init()
+  $num = $num + 1 
   if $yml['process'] == 1
-    puts "start VM dump!"
-    process_dump($list)
+    puts "start process dump!"
+    process_dump($list,$num)
   else
-    puts "start process random dump!"
+    puts "start VM dump!"
     dumpVM($list)
   end
 
